@@ -5,4 +5,12 @@ output:
     toc: false
 ---
 
-Describe your project.
+Association Rule mining comparision of ICD10 diagnosis codes between Canada and Australia
+
+Collaborators:
+
+Mingkai Peng
+Hude Quan
+Vijaya Sundararajan 
+Olivia Wawryk 
+Dennis Wollersheim  
