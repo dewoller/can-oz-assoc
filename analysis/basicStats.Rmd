@@ -1,0 +1,58 @@
+
+---
+title: "Basic Stats for Victorian Hospital ICD10 Coding"
+site: workflowr::wflow_site
+output:
+  workflowr::wflow_html:
+    toc: false
+---
+
+```{r pre_initial, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+rm(list=ls())
+options(width = 200)
+
+library(tidyverse)
+library( janitor )
+library( lubridate )
+library( kableExtra )
+source('lib/read_all_data.R')
+
+```
+
+# prepare frequency table
+```{r prep}
+
+read_all_data() %>% 
+  select( starts_with( 'diag' )) %>% 
+  { . } -> df_all_diag
+
+df_all_diag %>% 
+  gather( 'location', 'diag_code') %>%
+  filter( !is.na(diag_code ) ) %>%
+  count( diag_code, sort=TRUE ) %>%
+  mutate( fraction = n / sum(n) ) %>% 
+  { . } -> df_freq
+
+df_freq  %>%
+  write_csv( 'output/overall_diag_frequency.csv.gz')
+
+
+```
+# top 30 codes
+
+```{r table_frequency}
+
+read_csv( 'data/diagnosis_desc.csv' ) %>% 
+  { . } -> df_diag
+
+df_freq %>% 
+  head(30) %>%
+  inner_join( df_diag )  %>%
+  select( diag_code, diag_short_desc, n, fraction ) %>%
+  kable()
+
+```
+
+
+
