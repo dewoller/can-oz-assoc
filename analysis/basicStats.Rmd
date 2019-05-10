@@ -43,16 +43,29 @@ df_freq  %>%
 
 ```{r table_frequency}
 
-read_csv( 'data/diagnosis_desc.csv' ) %>% 
+
+read_csv( 'data/diagnosis_desc.csv', col_types=cols(
+                                                    type = col_character(),
+                                                    level = col_character(),
+                                                    code_id = col_character(),
+                                                    diag_code = col_character(),
+                                                    dagger = col_character(),
+                                                    asterisk = col_character(),
+                                                    valid = col_character(),
+                                                    aust_code = col_logical(),
+                                                    diag_desc = col_character(),
+                                                    diag_short_desc = col_character()) ) %>% 
   { . } -> df_diag
 
 df_freq %>% 
   head(30) %>%
-  inner_join( df_diag )  %>%
+  inner_join( df_diag, by='diag_code' )  %>%
   select( diag_code, diag_short_desc, n, fraction ) %>%
   kable()
 
+
+
 ```
 
-
+[Victoria 2012-2016 diagnosis code frequency](../output/overall_diag_frequency.csv.gz)
 
