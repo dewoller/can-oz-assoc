@@ -1,10 +1,12 @@
-name: "analysis"
+name: "Victorian Hospital ICD10 Coding"
 output_dir: "../docs"
 navbar:
-  title: "analysis"
+  title: "Menu"
   left:
     - text: "Home"
       href: index.html
+    - text: "Basic Stats"
+      href: basicStats.html
     - text: "About"
       href: about.html
     - text: "License"
