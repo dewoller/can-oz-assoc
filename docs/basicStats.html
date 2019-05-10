@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Basic Stats for Victorian Hospital ICD10 Coding</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Basic Stats for Victorian Hospital ICD10 Coding</h1>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2019-05-11</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20190511)</code> </summary></p>
+<p>The command <code>set.seed(20190511)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 75d1237 </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Untracked files:
+    Untracked:  data/HOSDATA
+    Untracked:  data/diagnosis_desc.csv
+    Untracked:  lib/
+    Untracked:  output/overall_diag_frequency.csv.gz
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+75d1237
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2019-05-11
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/basicStats.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="prepare-frequency-table" class="section level1">
+<h1>prepare frequency table</h1>
+<pre class="r"><code>read_all_data() %&gt;% 
+  select( starts_with( &#39;diag&#39; )) %&gt;% 
+  { . } -&gt; df_all_diag
+
+df_all_diag %&gt;% 
+  gather( &#39;location&#39;, &#39;diag_code&#39;) %&gt;%
+  filter( !is.na(diag_code ) ) %&gt;%
+  count( diag_code, sort=TRUE ) %&gt;%
+  mutate( fraction = n / sum(n) ) %&gt;% 
+  { . } -&gt; df_freq
+
+df_freq  %&gt;%
+  write_csv( &#39;output/overall_diag_frequency.csv.gz&#39;)</code></pre>
+</div>
+<div id="top-30-codes" class="section level1">
+<h1>top 30 codes</h1>
+<pre class="r"><code>read_csv( &#39;data/diagnosis_desc.csv&#39; ) %&gt;% 
+  { . } -&gt; df_diag</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  type = col_character(),
+  level = col_character(),
+  code_id = col_character(),
+  diag_code = col_character(),
+  dagger = col_character(),
+  asterisk = col_character(),
+  valid = col_character(),
+  aust_code = col_logical(),
+  diag_desc = col_character(),
+  diag_short_desc = col_character()
+)</code></pre>
+<pre class="r"><code>df_freq %&gt;% 
+  head(30) %&gt;%
+  inner_join( df_diag )  %&gt;%
+  select( diag_code, diag_short_desc, n, fraction ) %&gt;%
+  kable()</code></pre>
+<pre><code>Joining, by = &quot;diag_code&quot;</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+diag_code
+</th>
+<th style="text-align:left;">
+diag_short_desc
+</th>
+<th style="text-align:right;">
+n
+</th>
+<th style="text-align:right;">
+fraction
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Z8643
+</td>
+<td style="text-align:left;">
+Personal history of tobacco use disorder
+</td>
+<td style="text-align:right;">
+527324
+</td>
+<td style="text-align:right;">
+0.0320375
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Z720
+</td>
+<td style="text-align:left;">
+Tobacco use current
+</td>
+<td style="text-align:right;">
+427136
+</td>
+<td style="text-align:right;">
+0.0259506
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Y9222
+</td>
+<td style="text-align:left;">
+Health service area
+</td>
+<td style="text-align:right;">
+344016
+</td>
+<td style="text-align:right;">
+0.0209006
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+U739
+</td>
+<td style="text-align:left;">
+Unspecified activity
+</td>
+<td style="text-align:right;">
+268116
+</td>
+<td style="text-align:right;">
+0.0162893
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+E119
+</td>
+<td style="text-align:left;">
+Type 2 diabetes mellitus wo complication
+</td>
+<td style="text-align:right;">
+231327
+</td>
+<td style="text-align:right;">
+0.0140542
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+I10
+</td>
+<td style="text-align:left;">
+Essential (primary) hypertension
+</td>
+<td style="text-align:right;">
+201412
+</td>
+<td style="text-align:right;">
+0.0122367
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Z380
+</td>
+<td style="text-align:left;">
+Singleton born in hospital
+</td>
+<td style="text-align:right;">
+171480
+</td>
+<td style="text-align:right;">
+0.0104182
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Z370
+</td>
+<td style="text-align:left;">
+Single live birth
+</td>
+<td style="text-align:right;">
+171343
+</td>
+<td style="text-align:right;">
+0.0104099
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Y929
+</td>
+<td style="text-align:left;">
+Unspecified place of occurrence
+</td>
+<td style="text-align:right;">
+164107
+</td>
+<td style="text-align:right;">
+0.0099703
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+N179
+</td>
+<td style="text-align:left;">
+Acute kidney failure unspecified
+</td>
+<td style="text-align:right;">
+128747
+</td>
+<td style="text-align:right;">
+0.0078220
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+R074
+</td>
+<td style="text-align:left;">
+Chest pain unspecified
+</td>
+<td style="text-align:right;">
+114476
+</td>
+<td style="text-align:right;">
+0.0069550
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Z9222
+</td>
+<td style="text-align:left;">
+Persl h/o long-term use oth medts insln
+</td>
+<td style="text-align:right;">
+110787
+</td>
+<td style="text-align:right;">
+0.0067308
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+I959
+</td>
+<td style="text-align:left;">
+Hypotension unspecified
+</td>
+<td style="text-align:right;">
+105061
+</td>
+<td style="text-align:right;">
+0.0063830
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+N390
+</td>
+<td style="text-align:left;">
+Urinary tract infection site not spec
+</td>
+<td style="text-align:right;">
+103558
+</td>
+<td style="text-align:right;">
+0.0062916
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+E1122
+</td>
+<td style="text-align:left;">
+Type 2 DM w est diab nephropathy
+</td>
+<td style="text-align:right;">
+103305
+</td>
+<td style="text-align:right;">
+0.0062763
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+K590
+</td>
+<td style="text-align:left;">
+Constipation
+</td>
+<td style="text-align:right;">
+102421
+</td>
+<td style="text-align:right;">
+0.0062226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+E86
+</td>
+<td style="text-align:left;">
+Volume depletion
+</td>
+<td style="text-align:right;">
+99616
+</td>
+<td style="text-align:right;">
+0.0060522
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+J189
+</td>
+<td style="text-align:left;">
+Pneumonia unspecified
+</td>
+<td style="text-align:right;">
+97166
+</td>
+<td style="text-align:right;">
+0.0059033
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+O80
+</td>
+<td style="text-align:left;">
+Single spontaneous delivery
+</td>
+<td style="text-align:right;">
+96942
+</td>
+<td style="text-align:right;">
+0.0058897
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+E876
+</td>
+<td style="text-align:left;">
+Hypokalaemia
+</td>
+<td style="text-align:right;">
+90218
+</td>
+<td style="text-align:right;">
+0.0054812
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+R11
+</td>
+<td style="text-align:left;">
+Nausea and vomiting
+</td>
+<td style="text-align:right;">
+90211
+</td>
+<td style="text-align:right;">
+0.0054808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+D649
+</td>
+<td style="text-align:left;">
+Anaemia unspecified
+</td>
+<td style="text-align:right;">
+86078
+</td>
+<td style="text-align:right;">
+0.0052297
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+I500
+</td>
+<td style="text-align:left;">
+Congestive heart failure
+</td>
+<td style="text-align:right;">
+82716
+</td>
+<td style="text-align:right;">
+0.0050254
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+I489
+</td>
+<td style="text-align:left;">
+Atrial fibrillation and flutter unsp
+</td>
+<td style="text-align:right;">
+76821
+</td>
+<td style="text-align:right;">
+0.0046672
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+E1172
+</td>
+<td style="text-align:left;">
+Type 2 DM w features insulin resistance
+</td>
+<td style="text-align:right;">
+74132
+</td>
+<td style="text-align:right;">
+0.0045039
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+N183
+</td>
+<td style="text-align:left;">
+Chronic kidney disease stage 3
+</td>
+<td style="text-align:right;">
+72694
+</td>
+<td style="text-align:right;">
+0.0044165
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+A099
+</td>
+<td style="text-align:left;">
+Gastroenteritis &amp; colitis unsp origin
+</td>
+<td style="text-align:right;">
+70342
+</td>
+<td style="text-align:right;">
+0.0042736
+</td>
+</tr>
+</tbody>
+</table>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 18.04.2 LTS
+
+Matrix products: default
+BLAS: /usr/lib/x86_64-linux-gnu/openblas/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/libopenblasp-r0.2.20.so
+
+locale:
+ [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C               LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8     LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8    LC_PAPER=en_AU.UTF-8      
+ [8] LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] kableExtra_1.0.1 lubridate_1.7.4  janitor_1.1.1    forcats_0.4.0    stringr_1.4.0    dplyr_0.8.0.1    purrr_0.3.2      readr_1.3.1      tidyr_0.8.3      tibble_2.1.1     ggplot2_3.1.1   
+[12] tidyverse_1.2.1  nvimcom_0.9-82  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_0.2.5  xfun_0.6          haven_2.1.0       lattice_0.20-35   snakecase_0.9.2   colorspace_1.4-1  generics_0.0.2    viridisLite_0.3.0 htmltools_0.3.6   yaml_2.2.0       
+[11] rlang_0.3.4       R.oo_1.22.0       pillar_1.3.1      glue_1.3.1        withr_2.1.2       R.utils_2.7.0     modelr_0.1.4      readxl_1.3.1      plyr_1.8.4        munsell_0.5.0    
+[21] gtable_0.3.0      workflowr_1.1.1   cellranger_1.1.0  rvest_0.3.3       R.methodsS3_1.7.1 evaluate_0.13     knitr_1.22        highr_0.8         broom_0.5.2       Rcpp_1.0.1       
+[31] scales_1.0.0      backports_1.1.4   webshot_0.5.1     jsonlite_1.6      hms_0.4.2         digest_0.6.18     stringi_1.4.3     grid_3.4.4        rprojroot_1.3-2   cli_1.1.0        
+[41] tools_3.4.4       magrittr_1.5      lazyeval_0.2.2    crayon_1.3.4      whisker_0.3-2     pkgconfig_2.0.2   xml2_1.2.0        assertthat_0.2.1  rmarkdown_1.11    httr_1.4.0       
+[51] rstudioapi_0.10   R6_2.4.0          nlme_3.1-137      git2r_0.24.0      compiler_3.4.4   </code></pre>
+</div>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
